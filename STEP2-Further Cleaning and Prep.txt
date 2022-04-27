@@ -1,0 +1,48 @@
+STEP 2 
+Code for Further Data cleaning and Data Prep Year 2015-2020 
+Over here the FL AHCA files were linked with the CMS cost reports data
+
+Code was repeated on all the Individual yearly files 2015-2020
+
+**************************************************************************************************
+
+*FL AHCA 2015
+
+use "file path"
+
+drop SERV_LOC EVALCODE1 EVALCODE2 EVALCODE3 EVALCODE4 EVALCODE5 ECODE1 ECODE2 ECODE3
+drop REASON_CDE
+drop PTCOUNTY PTSTATE PTCOUNTRY HR_ARRIVAL EDHR_DISCH
+drop  _merge 
+
+tab YEAR 
+*16847
+
+codebook MCARE_NBR
+*277
+
+merge m:1 MCARE_NBR using  "Z:\Total Data April 4 2018\Onetomap Databases\CMS Dataset\Medicare Cost Reports\Hospital CCR Reports\CCR_2011.dta"
+
+tab YEAR if _merge == 3
+
+codebook MCARE_NBR if _merge == 3
+*159
+
+mdesc CCRatio if _merge == 3
+
+keep if _merge == 3 
+
+drop _merge 
+
+tab YEAR
+
+tab typeofproc
+
+drop if TotalCost ==  .
+rename *, upper
+
+
+save "file path", replace 
+
+
+

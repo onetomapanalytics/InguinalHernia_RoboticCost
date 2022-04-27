@@ -1,0 +1,197 @@
+
+At this STEP, STEP3 the individual yealry files were stacked together to combine the data into a master  file. 
+
+Then some variables were generated, total open, lap and robotic volume for each hospital, total charges for each hospital
+
+Cost based on the cost to charge ratios, age categories and others 
+
+
+Year 2015-2020
+
+
+clear 
+*********************************************************************
+use "path\FL AHCA_2015_V2.dta"
+append using "path\FL AHCA_2016_V2.dta"
+append using "path\FL AHCA_2017_V2.dta"
+append using "path\FL AHCA_2018_V2.dta"
+
+rename ATTEN_PHYI ATTEN_PHYID 
+rename ATTEN_PHYN ATTEN_PHYNPI 
+rename OPER_PHYNP OPER_PHYNPI 
+rename OTHOPER_PH OTHOPER_PHYID 
+rename OTHOPER__A OTHOPER_PHYNPI 
+rename FACL_NAME FACILITYNAME 
+rename FACL_COUNTY FACILITYCOUNTY
+
+append using "path\FL AHCA_2019_V2.dta"
+append using "path\FL AHCA_2020_V2.dta"
+
+
+drop ECMORB1 ECMORB2 ECMORB3
+
+codebook MCARE_NBR
+*164
+
+tab TYPEOFPROC
+
+tab OPEN_PR
+tab LAP_PR
+tab ROBOTIC_PR
+
+tab TYPEOFPROC
+
+save "\FL AHCA_2011_2020.dta", replace 
+
+
+use "\FL AHCA_2011_2020.dta", replace 
+
+codebook MCARE_NBR
+*163
+sort MCARE_NBR YEAR
+* the first obs is always an index
+by MCARE_NBR YEAR: gen IdX = _n == 1
+
+by MCARE_NBR YEAR: gen IdX2 = _n 
+
+*replace IDX2 = 999999 if IDX == 1 & IDX2==1 
+
+
+* ADDING THE TOTAL OPEN CASE FOR OPEN FOR EACH HOSPITAL 
+bysort MCARE_NBR YEAR : egen Tot_Open = sum(OPEN_PR) 
+
+* ADDING THE TOTAL LAP CASE FOR LAP FOR EACH HOSPITAL 
+bysort MCARE_NBR YEAR : egen Tot_Lap = sum(LAP_PR) 
+
+* ADDING THE TOTAL ROBOTIC CASES FOR EACH HOSPITAL 
+bysort MCARE_NBR YEAR : egen Tot_Rob = sum(ROBOTIC_PR) 
+
+* ADDING THE TOTAL HERNIA CASE FOR EACH HOSPITAL 
+bysort MCARE_NBR YEAR : egen Tot_Hernia = sum(LAP_PR+ROBOTIC_PR) 
+
+* ADDING THE TOTAL CHARGES FOR EACh HOSPITAL 
+*bysort MCARE_NBR YEAR : egen Tot_Chgs = sum(TCHGS) 
+
+order YEAR MCARE_NBR IdX Tot_Lap Tot_Rob Tot_Hernia , first
+
+save "\FL AHCA_2011_2020_V1.dta", replace 
+
+
+clear
+
+use "\FL AHCA_2011_2020_V1.dta"
+
+tab PRINDIAG, sort 
+
+keep if LOSDAYS == 0
+
+drop if TCHGS == 0
+
+tab YEAR 
+
+tab AGE, sort 
+replace AGE = 65 if AGE == 888
+replace AGE = 65 if AGE == 777
+
+tab PT_STATUS
+
+replace PT_STATUS = "01" if PT_STATUS == "1" 
+replace PT_STATUS = "02" if PT_STATUS == "2" 
+replace PT_STATUS = "03" if PT_STATUS == "3"
+replace PT_STATUS = "04" if PT_STATUS == "4"  
+replace PT_STATUS = "05" if PT_STATUS == "5" 
+replace PT_STATUS = "06" if PT_STATUS == "6" 
+replace PT_STATUS = "07" if PT_STATUS == "7" 
+
+drop if PT_STATUS == "02"
+
+gen Aweekend = 1 if WEEKDAY == "7" | WEEKDAY == "6"
+replace Aweekend = 0 if Aweekend == . 
+
+tab Aweekend 
+
+tab ETHNICITY 
+
+gen ETHNICITY2 = "" 
+replace ETHNICITY2  = "Hispanic Latino" if ETHNICITY == "E1"
+replace ETHNICITY2  = "A_NonHispanic" if ETHNICITY == "E2" | ETHNICITY == "E7"
+
+drop ETHNICITY
+rename ETHNICITY2 ETHNICITY
+
+gen RACE2 = "" 
+replace RACE2  = "A_White" if RACE == "5"
+replace RACE2  = "A_White" if RACE == "7"
+replace RACE2  = "B_Black" if RACE == "3"
+replace RACE2  = "C_Asian" if RACE == "2"
+replace RACE2  = "D_AmericanIndian" if RACE == "1"
+replace RACE2  = "E_Hawaiian_Pacific" if RACE == "4"
+replace RACE2  = "F_Other" if RACE == "6"
+
+replace RACE2  = "F_Other" if RACE2 == "D_AmericanIndian"
+replace RACE2  = "F_Other" if RACE2 == "E_Hawaiian_Pacific"
+
+tab RACE2
+
+tab ADMSRC 
+replace ADMSRC = "0" if ADMSRC == "00"
+
+tab PAYER 
+replace PAYER = "A" if PAYER == "B"
+replace PAYER  = "C" if PAYER == "D"
+
+replace PAYER  = "Medicare" if PAYER == "A"
+replace PAYER  = "Medicaid" if PAYER == "C"
+replace PAYER  = "Comerical Insurance" if PAYER == "E"
+replace PAYER  = "Other_Govt" if PAYER == "I" | PAYER == "J" | PAYER == "K"
+replace PAYER  = "Worker Comp" if PAYER == "I" | PAYER == "J" | PAYER == "H"
+replace PAYER  = "Self Pay" if PAYER == "I" | PAYER == "J" | PAYER == "L"
+replace PAYER  = "Others" if PAYER == "M" | PAYER == "N" | PAYER == "O" | PAYER == "P" | PAYER == "Q"
+
+
+
+tab PAYER
+
+tab TYPEOFPROC
+
+rename TYPEOFPROC typeofproc
+
+univar TCHGS
+
+gen typeofproc2 = ""
+replace typeofproc2 = "LAP" if typeofproc == 1
+replace typeofproc2 = "ROBOTIC" if typeofproc == 2
+
+
+count if TCHGS == 0
+*0
+count if OPRMCHGS == 0
+*0
+
+tab typeofproc if OPRMCHGS == 0
+*open 136, lap 3
+
+univar TCHGS 
+univar OPRMCHGS  
+
+gen COST = (TCHGS*CCRATIO)
+
+univar COST  
+
+***************************************************
+
+*RACE SEX AGE LOSDAYS PAYER CCIcat ADMSRC PT_STATUS
+
+summarize AGE
+
+gen Age1 = 1 if AGE <=40
+replace Age1 = 2 if AGE >=41 & AGE <=50
+replace Age1 = 3 if AGE >= 51 & AGE <=70
+replace Age1 = 4 if AGE >= 71
+
+tab Age1
+rename Age1 Age_Cat
+
+***************************************************
+
+save "\FL AHCA_2011_2020_V2.dta", replace 

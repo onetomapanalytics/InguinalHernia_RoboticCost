@@ -1,0 +1,79 @@
+STEP 1 
+Code for Basic Data cleaning and Data Prep to capture Inguinal Hernia for adult Males, same day discharge in Year 2015-2020 
+
+Code was repeated on all the Individual yearly files 2015-2020
+
+*********************************************************************
+
+read "file path
+
+drop if AGE<18
+drop if AGE==.
+drop if SEX == "F"
+
+replace PRINDIAG = subinstr(PRINDIAG, ".", "",.)
+
+replace PRINPROC = subinstr(PRINPROC, ".", "",.)
+
+order  OTHCPT1 OTHCPT2 OTHCPT3 OTHCPT4 OTHCPT5 OTHCPT6 OTHCPT7 OTHCPT8 OTHCPT9 OTHCPT10 OTHCPT11 OTHCPT12 OTHCPT13 OTHCPT14 OTHCPT15 OTHCPT16 OTHCPT17 OTHCPT18 OTHCPT19 OTHCPT20 OTHCPT21 OTHCPT22 OTHCPT23 OTHCPT24 OTHCPT25 OTHCPT26 OTHCPT27 OTHCPT28 OTHCPT29 OTHCPT30 PRINPROC OTHPROC1 OTHPROC2 OTHPROC3 OTHPROC4 PRINDIAG OTHDIAG1 OTHDIAG2 OTHDIAG3 OTHDIAG4 OTHDIAG5 OTHDIAG6 OTHDIAG7 OTHDIAG8 OTHDIAG9 , last 
+	
+isid SYS_RECID, sort
+
+gen Lap_PR= . 
+
+foreach v of var OTHCPT1-PRINPROC{
+replace  Lap_PR  = 1 if `v' == "1711" |`v'=="1712" |`v' == "1713" |  `v' == "0YU547Z"| `v' == "0YU54JZ"| `v' == "0YU54KZ"| `v' == "0YU647Z"| `v' == "0YU64JZ"| `v' == "0YU64KZ"| `v' == "0YQ53ZZ"| `v' == "0YQ54ZZ"| `v' == "0YQ63ZZ"| `v' == "0YQ64ZZ" | `v' == "49650" 
+}
+
+gen Open_PR= . 
+
+foreach v of var OTHCPT1-PRINPROC{
+replace  Open_PR  = 1 if `v' == "5301" |`v'=="5302" |`v' == "5303" | `v' == "5304" | `v' == "0YQ50ZZ"| `v' == "0YQ60ZZ"| `v' == "0YU507Z"| `v' == "0YU50JZ"| `v' == "0YU50KZ"| `v' == "0YU607Z"| `v' == "0YU60JZ"| `v' == "0YU60KZ" | `v' == "49505"| `v' == "49507" | `v' == "49525"
+}
+	
+keep if PRINDIAG == "55090" |  PRINDIAG == "55010" |  PRINDIAG == "55000"| PRINDIAG == "K4090" | PRINDIAG == "K4030" | PRINDIAG == "K4040"
+
+keep if LOSDAYS == 0
+
+
+gen CCIcat = . 
+replace CCIcat = 0 if  CCI == 0
+replace CCIcat = 1 if  CCI == 1
+replace CCIcat = 2 if  CCI >= 2 
+
+gen idx_hernia = . 
+
+replace idx_hernia = 1 if OTHCPT1 == "49505" | OTHCPT1 == "49507" | OTHCPT1 == "49525"
+replace idx_hernia = 2 if OTHCPT1 == "49650" 
+
+drop if idx_hernia == . 
+
+tab OTHCPT1 if Lap_PR == 1, sort 
+replace Lap_PR = 0 if OTHCPT1 == "49505" & Lap_PR == 1
+replace Lap_PR = 0 if OTHCPT1 == "49507" & Lap_PR == 1
+
+tab OTHCPT1 if Open_PR == 1, sort 
+replace Open_PR = 0 if OTHCPT1 == "49650" & Open_PR == 1
+
+drop Lap_PR
+drop Open_PR
+
+gen Open_PR = 1 if idx_hernia == 1
+gen Lap_PR = 1 if idx_hernia == 2
+
+replace Open_PR = 0 if Open_PR == .
+replace Lap_PR = 0 if Lap_PR == .
+
+tab Lap_PR Open_PR
+
+
+gen Robotic_PR = .
+foreach v of var OTHCPT1-OTHPROC4{
+replace Robotic_PR = 1 if `v' == "S2900"  & Lap_PR == 1| `v' == "1741" & Lap_PR == 1 | `v' == "1742"  & Lap_PR == 1 | `v' == "1749" & Lap_PR == 1 | `v' == "8E0W0CZ" & Lap_PR == 1| `v' == "8E0W4CZ" & Lap_PR == 1| `v' == "8E0W7CZ" & Lap_PR == 1| `v' == "8E0WXCZ" & Lap_PR == 1 |`v' == "S2900"  & Open_PR == 1| `v' == "1741" & Open_PR == 1 | `v' == "1742"  & Open_PR == 1 | `v' == "1749" & Open_PR == 1 | `v' == "8E0W0CZ" & Open_PR == 1| `v' == "8E0W4CZ" & Open_PR == 1| `v' == "8E0W7CZ" & Open_PR == 1| `v' == "8E0WXCZ" & Open_PR == 1
+  }
+
+gen typeofproc = 1 if Open_PR == 1 
+replace typeofproc = 2 if Lap_PR  == 1 
+replace typeofproc = 3 if Robotic_PR == 1 
+
+save "file path", replace 

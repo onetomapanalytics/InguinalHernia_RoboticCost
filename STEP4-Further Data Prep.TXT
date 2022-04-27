@@ -1,0 +1,844 @@
+STEP 4, data was further prepared to code for robotic hospital 
+
+In this step, all the hospitals that performed robtoic surgeries were sepeartes out first.
+Then 18 high volume hospitals were sepearted out. 
+
+Then for the yearly trend analysis, yearly data 2015-2020,2016-2020,2017-2020,2018-2020 and 2019-2020 was prepared and data files were created for the entire 86 and 18 high volume robotic hospitals. 
+
+
+******************************************************
+clear 
+use "\FL AHCA_2011_2020_V2.dta"
+
+tab typeofproc2
+
+tab YEAR typeofproc
+
+*drop IDX IDX2
+
+*drop Tot_Open Tot_Lap Tot_Rob Tot_Hernia TOTAL_OPEN TOTAL_LAP TOTAL_ROB TOTAL_HERNIA
+
+*drop IdX2 IdX FACLNBR OTHOPER_PHYID OTHOPER_PHYNPI FACILITYCOUNTY OTHCPT1 OTHCPT2 OTHCPT3 OTHCPT4 OTHCPT5 OTHCPT6 OTHCPT7 OTHCPT8 OTHCPT9 OTHCPT10 OTHCPT11 OTHCPT12 OTHCPT13 OTHCPT14 OTHCPT15 OTHCPT16 OTHCPT17 OTHCPT18 OTHCPT19 OTHCPT20 OTHCPT21 OTHCPT22 OTHCPT23 OTHCPT24 OTHCPT25 OTHCPT26 OTHCPT27 OTHCPT28 OTHCPT29 OTHCPT30 OTHPROC1 OTHPROC2 OTHPROC3 OTHPROC4 OTHDIAG1 OTHDIAG2 OTHDIAG3 OTHDIAG4 OTHDIAG5 OTHDIAG6 OTHDIAG7 OTHDIAG8 OTHDIAG9
+
+drop YEAR_COST IdX IDX IdX2
+drop Tot_Open Tot_Lap Tot_Rob Tot_Hernia 
+
+codebook MCARE_NBR
+*162
+
+tab YEAR typeofproc
+
+gen MCARE_NBR_s = string(MCARE_NBR)
+mdesc MCARE_NBR MCARE_NBR_s
+drop MCARE_NBR
+rename MCARE_NBR_s MCARE_NBR
+
+sort MCARE_NBR YEAR 
+* the first obs is always an index
+by MCARE_NBR YEAR : gen IDX = _n == 1
+
+* the first obs is always an index
+by MCARE_NBR : gen idx = _n == 1
+
+
+* ADDING THE TOTAL OPEN/LAP/ROB PROCEDURES FOR EACH FACILITY EACH YEAR 
+bysort MCARE_NBR YEAR : egen Tot_Open = sum(typeofproc == 1)
+bysort MCARE_NBR YEAR : egen Tot_Lap = sum(typeofproc == 2)
+bysort MCARE_NBR YEAR : egen Tot_Rob = sum(typeofproc == 3)
+bysort MCARE_NBR YEAR : egen Tot_Hernia = sum(typeofproc == 1 | typeofproc == 2 |typeofproc == 3)
+
+bysort MCARE_NBR : egen Tot_Hernia2 = sum(Tot_Hernia) if IDX == 1
+
+gen Tot_Hernia3 = Tot_Hernia2  if idx == 1
+
+order YEAR MCARE_NBR CCRATIO Tot_Open Tot_Lap Tot_Rob Tot_Hernia Tot_Hernia3, first 
+
+
+*keep if IDX == 1
+sort MCARE_NBR 
+by MCARE_NBR : gen idx_rob = 1 if (Tot_Rob !=0 & IDX ==1)  
+
+tab MCARE_NBR if Tot_Rob != 0
+
+tab MCARE_NBR if Tot_Rob != 0, sort 
+
+codebook MCARE_NBR if Tot_Rob != 0
+*86
+
+*drop idx_rob2 
+
+gen idx_rob2 = .
+replace idx_rob2 = 1 if MCARE_NBR == "100001"
+replace idx_rob2 = 1 if MCARE_NBR == "100006"
+replace idx_rob2 = 1 if MCARE_NBR == "100008"
+replace idx_rob2 = 1 if MCARE_NBR == "100012"
+replace idx_rob2 = 1 if MCARE_NBR == "100018"
+replace idx_rob2 = 1 if MCARE_NBR == "100019"
+replace idx_rob2 = 1 if MCARE_NBR == "100023"
+replace idx_rob2 = 1 if MCARE_NBR == "100026"
+replace idx_rob2 = 1 if MCARE_NBR == "100029"
+replace idx_rob2 = 1 if MCARE_NBR == "100030"
+replace idx_rob2 = 1 if MCARE_NBR == "100032"
+replace idx_rob2 = 1 if MCARE_NBR == "100035"
+replace idx_rob2 = 1 if MCARE_NBR == "100044"
+replace idx_rob2 = 1 if MCARE_NBR == "100046"
+replace idx_rob2 = 1 if MCARE_NBR == "100051"
+replace idx_rob2 = 1 if MCARE_NBR == "100055"
+replace idx_rob2 = 1 if MCARE_NBR == "100062"
+replace idx_rob2 = 1 if MCARE_NBR == "100069"
+replace idx_rob2 = 1 if MCARE_NBR == "100070"
+replace idx_rob2 = 1 if MCARE_NBR == "100073"
+replace idx_rob2 = 1 if MCARE_NBR == "100075"
+replace idx_rob2 = 1 if MCARE_NBR == "100080"
+replace idx_rob2 = 1 if MCARE_NBR == "100087"
+replace idx_rob2 = 1 if MCARE_NBR == "100088"
+replace idx_rob2 = 1 if MCARE_NBR == "100092"
+replace idx_rob2 = 1 if MCARE_NBR == "100105"
+replace idx_rob2 = 1 if MCARE_NBR == "100110"
+replace idx_rob2 = 1 if MCARE_NBR == "100113"
+replace idx_rob2 = 1 if MCARE_NBR == "100118"
+replace idx_rob2 = 1 if MCARE_NBR == "100121"
+replace idx_rob2 = 1 if MCARE_NBR == "100122"
+replace idx_rob2 = 1 if MCARE_NBR == "100124"
+replace idx_rob2 = 1 if MCARE_NBR == "100126"
+replace idx_rob2 = 1 if MCARE_NBR == "100128"
+replace idx_rob2 = 1 if MCARE_NBR == "100131"
+replace idx_rob2 = 1 if MCARE_NBR == "100132"
+replace idx_rob2 = 1 if MCARE_NBR == "100135"
+replace idx_rob2 = 1 if MCARE_NBR == "100154"
+replace idx_rob2 = 1 if MCARE_NBR == "100156"
+replace idx_rob2 = 1 if MCARE_NBR == "100161"
+replace idx_rob2 = 1 if MCARE_NBR == "100166"
+replace idx_rob2 = 1 if MCARE_NBR == "100167"
+replace idx_rob2 = 1 if MCARE_NBR == "100168"
+replace idx_rob2 = 1 if MCARE_NBR == "100173"
+replace idx_rob2 = 1 if MCARE_NBR == "100176"
+replace idx_rob2 = 1 if MCARE_NBR == "100177"
+replace idx_rob2 = 1 if MCARE_NBR == "100179"
+replace idx_rob2 = 1 if MCARE_NBR == "100180"
+replace idx_rob2 = 1 if MCARE_NBR == "100181"
+replace idx_rob2 = 1 if MCARE_NBR == "100187"
+replace idx_rob2 = 1 if MCARE_NBR == "100189"
+replace idx_rob2 = 1 if MCARE_NBR == "100191"
+replace idx_rob2 = 1 if MCARE_NBR == "100200"
+replace idx_rob2 = 1 if MCARE_NBR == "100204"
+replace idx_rob2 = 1 if MCARE_NBR == "100206"
+replace idx_rob2 = 1 if MCARE_NBR == "100209"
+replace idx_rob2 = 1 if MCARE_NBR == "100212"
+replace idx_rob2 = 1 if MCARE_NBR == "100213"
+replace idx_rob2 = 1 if MCARE_NBR == "100223"
+replace idx_rob2 = 1 if MCARE_NBR == "100224"
+replace idx_rob2 = 1 if MCARE_NBR == "100226"
+replace idx_rob2 = 1 if MCARE_NBR == "100228"
+replace idx_rob2 = 1 if MCARE_NBR == "100231"
+replace idx_rob2 = 1 if MCARE_NBR == "100236"
+replace idx_rob2 = 1 if MCARE_NBR == "100238"
+replace idx_rob2 = 1 if MCARE_NBR == "100242"
+replace idx_rob2 = 1 if MCARE_NBR == "100243"
+replace idx_rob2 = 1 if MCARE_NBR == "100248"
+replace idx_rob2 = 1 if MCARE_NBR == "100253"
+replace idx_rob2 = 1 if MCARE_NBR == "100254"
+replace idx_rob2 = 1 if MCARE_NBR == "100256"
+replace idx_rob2 = 1 if MCARE_NBR == "100259"
+replace idx_rob2 = 1 if MCARE_NBR == "100260"
+replace idx_rob2 = 1 if MCARE_NBR == "100264"
+replace idx_rob2 = 1 if MCARE_NBR == "100267"
+replace idx_rob2 = 1 if MCARE_NBR == "100268"
+replace idx_rob2 = 1 if MCARE_NBR == "100269"
+replace idx_rob2 = 1 if MCARE_NBR == "100287"
+replace idx_rob2 = 1 if MCARE_NBR == "100290"
+replace idx_rob2 = 1 if MCARE_NBR == "100314"
+replace idx_rob2 = 1 if MCARE_NBR == "100315"
+replace idx_rob2 = 1 if MCARE_NBR == "100316"
+replace idx_rob2 = 1 if MCARE_NBR == "100320"
+replace idx_rob2 = 1 if MCARE_NBR == "100329"
+replace idx_rob2 = 1 if MCARE_NBR == "120004"
+replace idx_rob2 = 1 if MCARE_NBR == "120006"
+
+
+replace idx_rob2 = 0 if idx_rob2 == .
+
+tab idx_rob2
+
+codebook MCARE_NBR if idx_rob2 == 0
+codebook MCARE_NBR if idx_rob2 == 1
+
+*drop Robot
+gen Robot = 1 if idx_rob2 == 1 & idx == 1 
+replace Robot = 0 if Robot == . & idx  == 1 
+
+tab Robot
+
+tab idx_rob2
+
+codebook MCARE_NBR if Robot == 0
+codebook MCARE_NBR if Robot == 1
+
+codebook MCARE_NBR if idx_rob2 == 0
+codebook MCARE_NBR if idx_rob2 == 1
+
+tab PRO_CODE if Robot == 0
+tab PRO_CODE if Robot == 1
+
+tab typeofproc if idx_rob2== 0
+tab typeofproc if idx_rob2== 1
+
+*Go to browser and select (filter on IDX_Y == 1)
+
+*go to browder select MCARE_NBR, YEAR, CCRATIO, Tot_Lap, Tot_Open, Tot_Rob, Tot_Hernia, and then filter on IDX ==1 & idx_rob2 == 1 
+
+
+sort MCARE_NBR YEAR 
+
+*sort YEAR typeofproc
+* the first obs is always an index
+*by MCARE_NBR YEAR: gen idy = _n == 1
+
+
+
+save "\FL AHCA_2011_2020_V3.dta", replace  
+
+
+
+clear 
+use "\FL AHCA_2011_2020_V3.dta"
+
+*drop if idx == 0
+
+tab Robot
+
+tab idx_rob2
+
+codebook MCARE_NBR if idx_rob2 == 1
+
+drop if idx_rob2 == 1
+
+tab typeofproc if MCARE_NBR == "100002" 
+
+tab typeofproc if MCARE_NBR == "100002" & YEAR == 2020
+
+summarize TCHGS 
+summarize TCHGS if typeofproc == 1
+summarize TCHGS if typeofproc == 2
+summarize TCHGS if typeofproc == 3
+
+summarize COST
+summarize COST if typeofproc == 1
+summarize COST if typeofproc == 2
+summarize COST if typeofproc == 3
+
+
+anova TCHGS typeofproc 
+tabstat TCHGS, statistics( mean sd skewness ) by(typeofproc)	
+pwcompare typeofproc, mcompare(tukey) effects
+
+
+anova COST typeofproc 
+tabstat COST, statistics( mean sd skewness ) by(typeofproc)	
+pwcompare typeofproc, mcompare(tukey) effects
+
+
+save "\FLAHCA_NonRobotic.dta", replace 
+
+
+
+
+clear 
+use "Y:\Haroon Janjua\Project_Lap_Open_Rob_FL AHCA_Charges\Data_iHernia\FL AHCA_2011_2020_V3.dta"
+
+
+*drop if idx == 0
+
+tab Robot
+
+summarize CCRATIO if idx_rob2 == 0
+summarize CCRATIO if idx_rob2 == 1
+
+summarize CCRATIO if Robot == 0
+summarize CCRATIO if Robot == 1
+
+
+tab idx_rob2
+
+codebook MCARE_NBR if idx_rob2 == 1
+
+drop if idx_rob2 == 0
+
+summarize TCHGS 
+summarize TCHGS if typeofproc == 1
+summarize TCHGS if typeofproc == 2
+summarize TCHGS if typeofproc == 3
+
+summarize COST
+summarize COST if typeofproc == 1
+summarize COST if typeofproc == 2
+summarize COST if typeofproc == 3
+
+
+anova TCHGS typeofproc 
+tabstat TCHGS, statistics( mean sd skewness ) by(typeofproc)	
+pwcompare typeofproc, mcompare(tukey) effects
+
+
+anova COST typeofproc 
+tabstat COST, statistics( mean sd skewness ) by(typeofproc)	
+pwcompare typeofproc, mcompare(tukey) effects
+
+save "\FLAHCA_Robotic.dta", replace 
+
+
+************************************************************
+************************************************************
+
+clear 
+use "\FLAHCA_Robotic.dta"
+
+order YEAR MCARE_NBR typeofproc2 idx_rob idx_rob2 Robot 
+
+tab idx_rob
+tab idx_rob2
+
+drop idx_rob2
+
+by MCARE_NBR : tab idx_rob YEAR 
+
+tab MCARE_NBR YEAR if idx_rob == 1
+
+replace idx_rob = 1 if MCARE_NBR =="100001" & YEAR >=	2018
+replace idx_rob = 1 if MCARE_NBR =="100006" & YEAR >=	2017
+replace idx_rob = 1 if MCARE_NBR =="100008" & YEAR >=	2020
+
+replace idx_rob = 1 if MCARE_NBR =="100012" & YEAR >=	2016
+replace idx_rob = 1 if MCARE_NBR =="100018" & YEAR >=	2020
+replace idx_rob = 1 if MCARE_NBR =="100019" & YEAR >=	2015
+
+replace idx_rob = 1 if MCARE_NBR =="100023" & YEAR >=	2017
+replace idx_rob = 1 if MCARE_NBR =="100026" & YEAR >=	2016
+replace idx_rob = 1 if MCARE_NBR =="100029" & YEAR >=	2017
+
+replace idx_rob = 1 if MCARE_NBR =="100030" & YEAR >=	2017
+replace idx_rob = 1 if MCARE_NBR =="100032" & YEAR >=	2015
+replace idx_rob = 1 if MCARE_NBR =="100035" & YEAR >=	2015
+
+replace idx_rob = 1 if MCARE_NBR =="100044" & YEAR >=	2016
+replace idx_rob = 1 if MCARE_NBR =="100046" & YEAR >=	2016
+replace idx_rob = 1 if MCARE_NBR =="100051" & YEAR >=	2015
+
+
+replace idx_rob = 1 if MCARE_NBR =="100055" & YEAR >=	2015
+replace idx_rob = 1 if MCARE_NBR =="100062" & YEAR >=	2016
+replace idx_rob = 1 if MCARE_NBR =="100069" & YEAR >=	2015
+
+
+replace idx_rob = 1 if MCARE_NBR =="100070" & YEAR >=	2015
+replace idx_rob = 1 if MCARE_NBR =="100073" & YEAR >=	2015
+replace idx_rob = 1 if MCARE_NBR =="100075" & YEAR >=	2016
+
+replace idx_rob = 1 if MCARE_NBR =="100080" & YEAR >=	2014
+replace idx_rob = 1 if MCARE_NBR =="100087" & YEAR >=	2016
+replace idx_rob = 1 if MCARE_NBR =="100088" & YEAR >=	2013
+
+replace idx_rob = 1 if MCARE_NBR =="100092" & YEAR >=	2015
+replace idx_rob = 1 if MCARE_NBR =="100105" & YEAR >=	2016
+replace idx_rob = 1 if MCARE_NBR =="100110" & YEAR >=	2017
+
+replace idx_rob = 1 if MCARE_NBR =="100113" & YEAR >=	2016
+replace idx_rob = 1 if MCARE_NBR =="100118" & YEAR >=	2012
+replace idx_rob = 1 if MCARE_NBR =="100121" & YEAR >=	2015
+
+replace idx_rob = 1 if MCARE_NBR =="100122" & YEAR >=	2014
+replace idx_rob = 1 if MCARE_NBR =="100124" & YEAR >=	2015
+replace idx_rob = 1 if MCARE_NBR =="100126" & YEAR >=	2018
+
+replace idx_rob = 1 if MCARE_NBR =="100128" & YEAR >=	2013
+replace idx_rob = 1 if MCARE_NBR =="100131" & YEAR >=	2017
+replace idx_rob = 1 if MCARE_NBR =="100132" & YEAR >=	2018
+
+replace idx_rob = 1 if MCARE_NBR =="100135" & YEAR >=	2015
+replace idx_rob = 1 if MCARE_NBR =="100154" & YEAR >=	2020
+replace idx_rob = 1 if MCARE_NBR =="100156" & YEAR >=	2018
+
+replace idx_rob = 1 if MCARE_NBR =="100161" & YEAR >=	2017
+replace idx_rob = 1 if MCARE_NBR =="100166" & YEAR >=	2015
+replace idx_rob = 1 if MCARE_NBR =="100167" & YEAR >=	2014
+
+
+replace idx_rob = 1 if MCARE_NBR =="100168" & YEAR >=	2015
+replace idx_rob = 1 if MCARE_NBR =="100173" & YEAR >=	2015
+replace idx_rob = 1 if MCARE_NBR =="100176" & YEAR >=	2015
+
+replace idx_rob = 1 if MCARE_NBR =="100177" & YEAR >=	2016
+replace idx_rob = 1 if MCARE_NBR =="100179" & YEAR >=	2016
+replace idx_rob = 1 if MCARE_NBR =="100180" & YEAR >=	2013
+
+replace idx_rob = 1 if MCARE_NBR =="100181" & YEAR >=	2018
+replace idx_rob = 1 if MCARE_NBR =="100187" & YEAR >=	2018
+replace idx_rob = 1 if MCARE_NBR =="100189" & YEAR >=	2015
+replace idx_rob = 1 if MCARE_NBR =="100191" & YEAR >=	2014
+replace idx_rob = 1 if MCARE_NBR =="100200" & YEAR >=	2013
+replace idx_rob = 1 if MCARE_NBR =="100204" & YEAR >=	2015
+replace idx_rob = 1 if MCARE_NBR =="100206" & YEAR >=	2015
+
+replace idx_rob = 1 if MCARE_NBR =="100209" & YEAR >=	2015
+replace idx_rob = 1 if MCARE_NBR =="100212" & YEAR >=	2015
+replace idx_rob = 1 if MCARE_NBR =="100213" & YEAR >=	2016
+replace idx_rob = 1 if MCARE_NBR =="100223" & YEAR >=	2015
+replace idx_rob = 1 if MCARE_NBR =="100224" & YEAR >=	2019
+replace idx_rob = 1 if MCARE_NBR =="100226" & YEAR >=	2013
+replace idx_rob = 1 if MCARE_NBR =="100228" & YEAR >=	2014
+replace idx_rob = 1 if MCARE_NBR =="100231" & YEAR >=	2014
+replace idx_rob = 1 if MCARE_NBR =="100236" & YEAR >=	2016
+replace idx_rob = 1 if MCARE_NBR =="100238" & YEAR >=	2017
+replace idx_rob = 1 if MCARE_NBR =="100242" & YEAR >=	2015
+replace idx_rob = 1 if MCARE_NBR =="100243" & YEAR >=	2017
+replace idx_rob = 1 if MCARE_NBR =="100248" & YEAR >=	2015
+replace idx_rob = 1 if MCARE_NBR =="100253" & YEAR >=	2016
+replace idx_rob = 1 if MCARE_NBR =="100254" & YEAR >=	2015
+replace idx_rob = 1 if MCARE_NBR =="100256" & YEAR >=	2019
+replace idx_rob = 1 if MCARE_NBR =="100259" & YEAR >=	2019
+replace idx_rob = 1 if MCARE_NBR =="100260" & YEAR >=	2018
+replace idx_rob = 1 if MCARE_NBR =="100264" & YEAR >=	2015
+replace idx_rob = 1 if MCARE_NBR =="100267" & YEAR >=	2017
+replace idx_rob = 1 if MCARE_NBR =="100268" & YEAR >=	2015
+replace idx_rob = 1 if MCARE_NBR =="100269" & YEAR >=	2016
+replace idx_rob = 1 if MCARE_NBR =="100287" & YEAR >=	2015
+replace idx_rob = 1 if MCARE_NBR =="100290" & YEAR >=	2016
+replace idx_rob = 1 if MCARE_NBR =="100314" & YEAR >=	2020
+replace idx_rob = 1 if MCARE_NBR =="100315" & YEAR >=	2016
+replace idx_rob = 1 if MCARE_NBR =="100316" & YEAR >=	2017
+replace idx_rob = 1 if MCARE_NBR =="100320" & YEAR >=	2019
+replace idx_rob = 1 if MCARE_NBR =="100329" & YEAR >=	2018
+replace idx_rob = 1 if MCARE_NBR =="120004" & YEAR >=	2019
+replace idx_rob = 1 if MCARE_NBR =="120006" & YEAR >=	2019
+
+replace idx_rob = 0 if idx_rob == .
+
+
+gen idx_rob2 = idx_rob if YEAR >= 2015
+
+tab MCARE_NBR YEAR if idx_rob2 == 1 & typeofproc== 3
+
+
+gen idx_rob3 = idx_rob2 if MCARE_NBR == "100206" | MCARE_NBR == "100209" | MCARE_NBR == "100231" | MCARE_NBR == "100269" | MCARE_NBR == "100253" | MCARE_NBR == "100260" | MCARE_NBR == "100051" | MCARE_NBR == "100135" | MCARE_NBR == "100167" | MCARE_NBR == "100204" | MCARE_NBR == "100006" | MCARE_NBR == "100080" | MCARE_NBR == "100212" | MCARE_NBR == "100243" | MCARE_NBR == "100213" | MCARE_NBR == "100189" | MCARE_NBR == "100242" | MCARE_NBR == "100180" 
+
+
+
+destring VISITS, generate(VISITS_s)
+mdesc VISITS VISITS_s 
+drop VISITS
+rename VISITS_s  VISITS
+
+
+replace PAYER = "1_Medicare" if PAYER == "Medicare"
+tab PAYER 
+
+
+save "\FLAHCA_Robotic_V2.dta"
+
+
+
+
+
+
+****************************************************************
+*Select 18 Facilities 
+****************************************************************
+
+
+clear 
+use "\FLAHCA_Robotic_V2.dta"
+
+codebook MCARE_NBR if idx_rob3 == 1
+*18/16190
+
+tab idx_rob3
+
+gen Hosp_100 = 1 if idx_rob3 == 1 & YEAR >= 2015
+replace Hosp_100 = 0 if idx_rob3 == 1 & YEAR < 2015
+
+tab Hosp_100
+
+
+tab YEAR if idx_rob3 == 1 
+
+tab YEAR if Hosp_100 == 1 
+
+
+tab typeofproc if idx_rob3 == 1 
+
+tab typeofproc if Hosp_100 == 1 
+
+
+
+gen TIME2 = 1 if idx_rob2 == 1 & YEAR == 2015 | idx_rob2 == 0 & YEAR == 2015
+replace TIME2 = 2 if idx_rob2 == 1 & YEAR == 2016 | idx_rob2 == 0 & YEAR == 2016
+replace TIME2 = 3 if idx_rob2 == 1 & YEAR == 2017| idx_rob2 == 0 & YEAR == 2017
+replace TIME2 = 4 if idx_rob2 == 1 & YEAR == 2018| idx_rob2 == 0 & YEAR == 2018
+replace TIME2 = 5 if idx_rob2 == 1 & YEAR == 2019| idx_rob2 == 0 & YEAR == 2019
+replace TIME2 = 6 if idx_rob2 == 1 & YEAR == 2020| idx_rob2 == 0 & YEAR == 2020
+
+
+tab YEAR typeofproc 
+
+
+*tab typeofproc if YEAR >= 2015 & idx_rob3 == 1
+
+gen TIME = 1 if idx_rob3 == 1 & YEAR == 2015
+replace TIME = 2 if idx_rob3 == 1 & YEAR == 2016
+replace TIME = 3 if idx_rob3 == 1 & YEAR == 2017
+replace TIME = 4 if idx_rob3 == 1 & YEAR == 2018
+replace TIME = 5 if idx_rob3 == 1 & YEAR == 2019
+replace TIME = 6 if idx_rob3 == 1 & YEAR == 2020
+
+tab TIME
+
+
+
+codebook MCARE_NBR
+*86/62330
+
+codebook MCARE_NBR if Hosp_100 == 1
+*18/8604
+codebook MCARE_NBR if Hosp_100 == 1 & TIME >= 1
+*18/8604
+
+*(go to browser and selecte YEAR, MCARE_NBR, CCRATIO, IDX ==1, Hosp_100 != .)
+
+tab Hosp_100 
+
+*summarize CCRATIO 
+*below is the right way to to look at Mean Cost to Charge Ratio for the select robotic hospital from 2015-2020
+
+* 2 includes only robotic years, where 3 includes all years and is based on total observations
+
+summarize CCRATIO if IDX == 1 & Hosp_100 == 1 
+
+*2
+*summarize CCRATIO if IDX == 1 & Hosp_100 == 1  & Tot_Rob2 > 0
+
+*3
+*summarize CCRATIO if Hosp_100 == 1 | Hosp_100 == 0 
+
+
+*drop idx_rob idx_rob2 idx_rob3 idx_rob4 
+
+*54% missing 
+drop INTERNS_AND_RESIDENTS
+
+
+drop PRO_CODE FAC_COUNTY RACE LOSDAYS HOSPITAL_NAME
+
+drop LAP_PR OPEN_PR ROBOTIC_PR
+
+drop FYB FYE
+
+drop CITY STATE
+
+drop TYPE_SERV ADMSRC
+
+drop typeofproc2
+
+tab typeofproc
+
+gen typeofproc2 = "OPEN" if typeofproc == 1
+replace typeofproc2 = "LAP" if typeofproc == 2
+replace typeofproc2 = "ROBOTIC" if typeofproc == 3
+
+tab typeofproc2
+
+tab YEAR TIME
+
+tab YEAR typeofproc if Hosp_100 == 1 | Hosp_100 == 0
+ 
+tab YEAR typeofproc if Hosp_100 == 1
+
+
+gen Cost_OPR = (OPRMCHGS*CCRATIO)
+
+gen OPR_PC = (Cost_OPR/COST) 
+
+gen OPR_PC_CHG = (OPRMCHGS/TCHGS) 
+
+gen Non_OPR_Cost = ((TCHGS-OPRMCHGS)*CCRATIO)
+
+gen Non_OPR_CHGS = (TCHGS-OPRMCHGS)
+
+
+order SYS_RECID YEAR MCARE_NBR Tot_Open Tot_Lap Tot_Rob Tot_Hernia TCHGS OPRMCHGS Non_OPR_CHGS COST Cost_OPR Non_OPR_Cost CCRATIO TIME Hosp_100 typeofproc2 typeofproc TIME TIME2 , first 
+
+*for Sheet "Volume By Facility and Year", filter it by IDX == 1
+
+
+save "\FLAHCA_Robotic_V3.dta", replace 
+
+
+***********************************************************
+use "\FLAHCA_Robotic_V3.dta"
+
+drop if TIME == . 
+
+tab TIME 
+
+tab YEAR 
+
+tab YEAR QTR 
+
+destring QTR, generate(QTR_n)
+drop QTR 
+rename QTR_n QTR 
+
+order SYS_RECID MCARE_NBR Tot_Open Tot_Lap Tot_Rob Tot_Hernia TCHGS OPRMCHGS Non_OPR_CHGS COST Cost_OPR Non_OPR_Cost CCRATIO OPR_PC OPR_PC_CHG TOTAL_HOSPITAL_BEDS VISITS TIME TIME2 typeofproc2 typeofproc YEAR QTR Hosp_100 , first 
+
+
+keep SYS_RECID MCARE_NBR Tot_Open Tot_Lap Tot_Rob Tot_Hernia TCHGS OPRMCHGS Non_OPR_CHGS COST Cost_OPR Non_OPR_Cost CCRATIO OPR_PC OPR_PC_CHG TOTAL_HOSPITAL_BEDS VISITS TIME typeofproc2 typeofproc YEAR QTR
+
+save "\Hernia_18_Robotic.dta", replace 
+
+
+***********************************************************
+use "\FLAHCA_Robotic_V3.dta"
+
+
+order SYS_RECID MCARE_NBR Tot_Open Tot_Lap Tot_Rob Tot_Hernia TCHGS OPRMCHGS Non_OPR_CHGS COST Cost_OPR Non_OPR_Cost CCRATIO OPR_PC OPR_PC_CHG TOTAL_HOSPITAL_BEDS VISITS TIME TIME2 typeofproc2 typeofproc YEAR Hosp_100 , first 
+
+
+drop if TIME2 == . 
+
+tab TIME2 
+
+tab YEAR 
+
+destring QTR, generate(QTR_n)
+drop QTR 
+rename QTR_n QTR 
+
+order SYS_RECID MCARE_NBR Tot_Open Tot_Lap Tot_Rob Tot_Hernia TCHGS OPRMCHGS Non_OPR_CHGS COST Cost_OPR Non_OPR_Cost CCRATIO OPR_PC OPR_PC_CHG TOTAL_HOSPITAL_BEDS VISITS TIME TIME2 typeofproc2 typeofproc YEAR QTR Hosp_100 , first 
+
+keep SYS_RECID MCARE_NBR Tot_Open Tot_Lap Tot_Rob Tot_Hernia TCHGS OPRMCHGS Non_OPR_CHGS COST Cost_OPR Non_OPR_Cost CCRATIO OPR_PC OPR_PC_CHG TOTAL_HOSPITAL_BEDS VISITS TIME2 typeofproc2 typeofproc YEAR QTR 
+
+save "\Hernia_86_Robotic.dta", replace 
+
+
+
+
+***********************************************************
+***********************************************************
+***********************************************************
+clear 
+use "\Hernia_18_Robotic.dta"
+
+tab YEAR 
+
+tab YEAR typeofproc
+
+gen typeofproc3 = 1 if typeofproc == 3 & YEAR > 2015
+tab YEAR typeofproc3
+
+keep if typeofproc3 == 1
+
+drop typeofproc2 typeofproc
+
+drop MCARE_NBR Tot_Open Tot_Lap Tot_Rob Tot_Hernia TCHGS OPRMCHGS Non_OPR_CHGS CCRATIO OPR_PC OPR_PC_CHG TOTAL_HOSPITAL_BEDS VISITS QTR
+
+save "\Hernia_18_Robotic_16_20.dta", replace 
+***********************************************************
+
+clear 
+use "\Hernia_18_Robotic.dta"
+
+
+tab YEAR 
+
+tab YEAR typeofproc
+
+gen typeofproc4 = 1 if typeofproc == 3 & YEAR > 2016
+tab YEAR typeofproc4
+
+keep if typeofproc4 == 1
+
+drop typeofproc2 typeofproc
+
+drop MCARE_NBR Tot_Open Tot_Lap Tot_Rob Tot_Hernia TCHGS OPRMCHGS Non_OPR_CHGS CCRATIO OPR_PC OPR_PC_CHG TOTAL_HOSPITAL_BEDS VISITS QTR
+
+save "\Hernia_18_Robotic_17_20.dta", replace 
+***********************************************************
+
+clear 
+use "\Hernia_18_Robotic.dta"
+
+
+tab YEAR 
+
+tab YEAR typeofproc
+
+gen typeofproc5 = 1 if typeofproc == 3 & YEAR > 2017
+tab YEAR typeofproc5
+
+keep if typeofproc5 == 1
+
+drop typeofproc2 typeofproc
+
+drop MCARE_NBR Tot_Open Tot_Lap Tot_Rob Tot_Hernia TCHGS OPRMCHGS Non_OPR_CHGS CCRATIO OPR_PC OPR_PC_CHG TOTAL_HOSPITAL_BEDS VISITS QTR
+
+save "\Hernia_18_Robotic_18_20.dta", replace 
+***********************************************************
+
+clear 
+use "\Hernia_18_Robotic.dta"
+
+
+tab YEAR 
+
+tab YEAR typeofproc
+
+gen typeofproc6 = 1 if typeofproc == 3 & YEAR > 2018
+tab YEAR typeofproc6
+
+keep if typeofproc6 == 1
+
+drop typeofproc2 typeofproc
+
+drop MCARE_NBR Tot_Open Tot_Lap Tot_Rob Tot_Hernia TCHGS OPRMCHGS Non_OPR_CHGS CCRATIO OPR_PC OPR_PC_CHG TOTAL_HOSPITAL_BEDS VISITS QTR
+
+save "\Hernia_18_Robotic_19_20.dta", replace 
+***********************************************************
+
+clear 
+use "\Hernia_18_Robotic.dta"
+
+
+drop MCARE_NBR Tot_Open Tot_Lap Tot_Rob Tot_Hernia TCHGS OPRMCHGS Non_OPR_CHGS CCRATIO OPR_PC OPR_PC_CHG TOTAL_HOSPITAL_BEDS VISITS QTR
+keep if typeofproc2 == "ROBOTIC"
+tab typeofproc
+append using "\Hernia_18_Robotic_16_20.dta"
+append using "\Hernia_18_Robotic_17_20.dta"
+append using "\Hernia_18_Robotic_18_20.dta"
+append using "\Hernia_18_Robotic_19_20.dta"
+
+
+*replace typeofproc2 = "" if typeofproc2 == "ROBOTIC" & typeproc2 == "ROB_16-20"
+
+*drop typeproc2 
+gen typeproc2 = "ROB_15-20" if typeofproc == 3
+replace typeproc2 = "ROB_16-20" if typeofproc3 == 1
+replace typeproc2 = "ROB_17-20" if typeofproc4 == 1
+replace typeproc2 = "ROB_18-20" if typeofproc5 == 1
+replace typeproc2 = "ROB_19-20" if typeofproc6 == 1
+
+tab typeproc2 
+
+save "\Hernia_18_Robotic_YEARLY.dta", replace 
+
+
+
+***********************************************************
+***********************************************************
+***********************************************************
+clear 
+use "\Hernia_86_Robotic.dta"
+
+tab YEAR 
+
+tab YEAR typeofproc
+
+gen typeofproc3 = 1 if typeofproc == 3 & YEAR > 2015
+tab YEAR typeofproc3
+
+keep if typeofproc3 == 1
+
+drop typeofproc2 typeofproc
+
+drop MCARE_NBR Tot_Open Tot_Lap Tot_Rob Tot_Hernia TCHGS OPRMCHGS Non_OPR_CHGS CCRATIO OPR_PC OPR_PC_CHG TOTAL_HOSPITAL_BEDS VISITS QTR
+
+save "\Hernia_86_Robotic_16_20.dta", replace 
+***********************************************************
+
+clear 
+use "\Hernia_86_Robotic.dta"
+
+
+tab YEAR 
+
+tab YEAR typeofproc
+
+gen typeofproc4 = 1 if typeofproc == 3 & YEAR > 2016
+tab YEAR typeofproc4
+
+keep if typeofproc4 == 1
+
+drop typeofproc2 typeofproc
+
+drop MCARE_NBR Tot_Open Tot_Lap Tot_Rob Tot_Hernia TCHGS OPRMCHGS Non_OPR_CHGS CCRATIO OPR_PC OPR_PC_CHG TOTAL_HOSPITAL_BEDS VISITS QTR
+
+save "\Hernia_86_Robotic_17_20.dta", replace 
+***********************************************************
+
+clear 
+use "\Hernia_86_Robotic.dta"
+
+
+tab YEAR 
+
+tab YEAR typeofproc
+
+gen typeofproc5 = 1 if typeofproc == 3 & YEAR > 2017
+tab YEAR typeofproc5
+
+keep if typeofproc5 == 1
+
+drop typeofproc2 typeofproc
+
+drop MCARE_NBR Tot_Open Tot_Lap Tot_Rob Tot_Hernia TCHGS OPRMCHGS Non_OPR_CHGS CCRATIO OPR_PC OPR_PC_CHG TOTAL_HOSPITAL_BEDS VISITS QTR
+
+save "\Hernia_86_Robotic_18_20.dta", replace 
+***********************************************************
+
+
+clear 
+use "\Hernia_86_Robotic.dta"
+
+
+tab YEAR 
+
+tab YEAR typeofproc
+
+gen typeofproc6 = 1 if typeofproc == 3 & YEAR > 2018
+tab YEAR typeofproc6
+
+keep if typeofproc6 == 1
+
+drop typeofproc2 typeofproc
+
+drop MCARE_NBR Tot_Open Tot_Lap Tot_Rob Tot_Hernia TCHGS OPRMCHGS Non_OPR_CHGS CCRATIO OPR_PC OPR_PC_CHG TOTAL_HOSPITAL_BEDS VISITS QTR
+
+save "\Hernia_86_Robotic_19_20.dta", replace 
+***********************************************************
+
+clear 
+use "\Hernia_86_Robotic.dta"
+
+
+drop MCARE_NBR Tot_Open Tot_Lap Tot_Rob Tot_Hernia TCHGS OPRMCHGS Non_OPR_CHGS CCRATIO OPR_PC OPR_PC_CHG TOTAL_HOSPITAL_BEDS VISITS QTR
+keep if typeofproc2 == "ROBOTIC"
+tab typeofproc
+
+append using "\Hernia_86_Robotic_16_20.dta"
+append using "\Hernia_86_Robotic_17_20.dta"
+append using "\Hernia_86_Robotic_18_20.dta"
+append using "\Hernia_86_Robotic_19_20.dta"
+
+gen typeproc2 = "ROB_15-20" if typeofproc == 3
+replace typeproc2 = "ROB_16-20" if typeofproc3 == 1
+replace typeproc2 = "ROB_17-20" if typeofproc4 == 1
+replace typeproc2 = "ROB_18-20" if typeofproc5 == 1
+replace typeproc2 = "ROB_19-20" if typeofproc6 == 1
+
+tab typeproc2 
+
+
+save "\Hernia_86_Robotic_YEARLY.dta", replace 
+
+
+
+
+
