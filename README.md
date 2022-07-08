@@ -4,7 +4,7 @@ Evaluating the Trends in Cost of Robotic Inguinal Hernai as comapred to the Open
 
 This analysis is focused on th eOutpatient Inguinal Hernina in the state of Florida. Florida Agency for Healthcare Administration, outpatient discharge data was linked with CMS Cost reports data to anlayze the trends in cost (cost data was adjusted for inflation) of robotic inguinal hernia.
 
-All the date cleaning and prep was performed in STATA, whereas trend modeling was performed using R Studio.
+All the data cleaning and preperation was performed in STATA, whereas trend modeling was performed using R Studio.
 
 Access to FL AHCA is subject to a Data Use Agreement and authorization by the Florida Agency of Health Care Administration, all of the authors on this project have authorization to utilize this data set for research purposes. (CMS Cost reporst data is publicly available)
 
